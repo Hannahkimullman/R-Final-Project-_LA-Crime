@@ -1,0 +1,68 @@
+## clean data with blank in race
+clean_data_race = clean_data[!(clean_data$Victim.Descent == ""),]
+
+## Adding category to combine in high level
+race_data = clean_data_race %>%
+  mutate(Highlevel.Race=ifelse(Victim.Descent %in% c("A", "C", "D", "F", "J", "K", "L", "V", "Z"),"Asian",
+                               ifelse(Victim.Descent %in% c("G", "I", "O", "P", "S", "U", "X"),"Other",
+                                      ifelse(Victim.Descent %in% c("B"),"Black",
+                                             ifelse(Victim.Descent %in% c("H"),"Hispanic","White")))))
+
+## Separate Year from "Date Occurred"  #### Due to error
+library(dplyr)
+race_data = separate(race_data, Date.Occurred, c("y", "m" ,"d"))
+
+race_data$Highlevel.Race = as.factor(race_data$Highlevel.Race)
+levels(race_data$Highlevel.Race) = c("Hispanic", "White", "Black", "Other", "Asian")    
+
+
+## 1. Total number of victims by sex and by race during year 2010 - 2017 : WOMEN
+library(ggplot2)
+library(gridExtra)
+
+Women_Race = race_data%>%
+  filter(Victim.Sex == "F") 
+
+### 1) showing per race
+ggplot(Women_Race, aes(x = y, fill = Highlevel.Race)) +
+  geom_bar() +
+  facet_wrap(~Highlevel.Race) +
+  coord_flip()
+
+### 2) showing per year/ count is not showing
+  
+ggplot(Women_Race, aes(fill = y, x = Highlevel.Race)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~y, nrow=4) +
+  coord_flip() +
+  ylab("No. of Occurence") +
+  xlab("Identified Victim's Race") +
+  ggtitle("Total number of victims by sex and by race during year 2010 - 2017 : Women") +
+  scale_fill_manual(limits =c("Hispanic", "White", "Black", "Other", "Asian"),
+                    breaks =c("Hispanic", "White", "Black", "Other", "Asian"),
+                    values = c("Skyblue", "royalblue", "blue","navy", "red"))
+
+  
+
+## 2. Total number of victims by sex and by race during year 2010 - 2017 : MEN
+Men_Race = race_data%>%
+  filter(Victim.Sex == "M") 
+
+### 1) showing per race
+ggplot(Men_Race, aes(x = y, fill = Highlevel.Race)) +
+  geom_bar() +
+  facet_wrap(~Highlevel.Race) +
+  coord_flip()
+
+### 2) showing per year   ###count is not showing
+
+ggplot(Men_Race, aes(fill = y, x = Highlevel.Race)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~y, nrow=4) +
+  coord_flip() +
+  ylab("No. of Occurence") +
+  xlab("Identified Victim's Race") +
+  ggtitle("Total number of victims by sex and by race during year 2010 - 2017 : Men") +
+  scale_fill_manual(limits =c("Hispanic", "White", "Black", "Other", "Asian"),
+                    breaks =c("Hispanic", "White", "Black", "Other", "Asian"),
+                    values = c("Skyblue", "royalblue", "blue","navy", "red"))
